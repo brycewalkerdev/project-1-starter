@@ -54,10 +54,19 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  // check if files are the same
-  if (same_file_path(argv[1], argv[2])) {
-    fprintf(stderr, "error: input and output file must differ\n");
-    return 1;
+  if (argc == 3) {
+
+    // check if files are the same
+    if (same_file_path(argv[1], argv[2])) {
+      fprintf(stderr, "error: input and output file must differ\n");
+      return 1;
+    }
+
+    out_file_ptr = fopen(argv[2], "rw");
+    if (out_file_ptr == NULL) {
+      fprintf(stderr, "error: cannot open file '%s'\n", argv[2]);
+      return 1;
+    }
   }
 
   // open file to read
