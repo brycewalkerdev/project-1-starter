@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,12 +46,14 @@ static int same_file_path(const char *a, const char *b) {
 }
 
 int main(int argc, char *argv[]) {
+  bool write_to_file = false;
+
   FILE *in_file_ptr = NULL;
   FILE *out_file_ptr = stdout;
 
   // no args specificed
   if (argc < 2 || argc > 3) {
-    printf("usage: reverse <input> <output>\n");
+    fprintf(stderr, "usage: reverse <input> <output>\n");
     return 1;
   }
 
@@ -62,11 +65,13 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    out_file_ptr = fopen(argv[2], "rw");
+    // open file to write
+    out_file_ptr = fopen(argv[2], "wb");
     if (out_file_ptr == NULL) {
       fprintf(stderr, "error: cannot open file '%s'\n", argv[2]);
       return 1;
     }
+    write_to_file = true;
   }
 
   // open file to read
@@ -102,6 +107,9 @@ int main(int argc, char *argv[]) {
   }
 
   fclose(in_file_ptr);
+  if (write_to_file) {
+    fclose(out_file_ptr);
+  }
 
   return 0;
 }
