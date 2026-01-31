@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 static int seek_prev_line(FILE *fp) {
@@ -34,15 +35,28 @@ static int seek_prev_line(FILE *fp) {
   return fseek(fp, 0, SEEK_SET);
 }
 
+static int same_file_path(const char *a, const char *b) {
+  struct stat sa, sb;
+  if (stat(a, &sa) != 0)
+    return 0;
+  if (stat(b, &sb) != 0)
+    return 0;
+  return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
+}
+
 int main(int argc, char *argv[]) {
   FILE *in_file_ptr = NULL;
-  // FILE *out_file_ptr = NULL;
-  // long file_size = 0;
-  // size_t bytes_read = 0;
+  FILE *out_file_ptr = stdout;
 
   // no args specificed
-  if (argc < 2) {
+  if (argc < 2 || argc > 3) {
     printf("usage: reverse <input> <output>\n");
+    return 1;
+  }
+
+  // check if files are the same
+  if (same_file_path(argv[1], argv[2])) {
+    fprintf(stderr, "error: input and output file must differ\n");
     return 1;
   }
 
@@ -66,7 +80,7 @@ int main(int argc, char *argv[]) {
     // getline advances the file pointer so store it
     long prev_pos = ftell(in_file_ptr);
     if (getline(&line, &cap, in_file_ptr) != -1) {
-      fprintf(stdout, "%s", line);
+      fprintf(out_file_ptr, "%s", line);
     }
 
     // rewind so we dont read the same line forever
